@@ -1,0 +1,20 @@
+const express = require("express");
+const router = express.Router();
+const userController = require("../controllers/userController");
+const recruteurController = require("../controllers/recruteurController");
+
+
+router.post("/createCandidat", userController.createCandidat);
+router.get("/getAllCandidat", userController.getAllCandidat);
+router.get("/getCandidatById/:id", userController.getCandidatById);
+router.put("/updateCandidatById/:id",userController.updateCandidatById);
+router.delete("/deleteCandidat/:id", userController.deleteCandidat);
+
+
+router.post("/createRecruteur", recruteurController.createRecruteur);
+/*router.get("/getAllRecruteurs", recruteurController.getAllRecruteurs);
+router.get("/getRecruteurById/:id", recruteurController.getRecruteurById);
+/*router.put("/recruteur/:id", recruteurController.updateRecruteur);
+router.delete("/recruteur/:id", recruteurController.deleteRecruteur);*/
+
+module.exports = router;
