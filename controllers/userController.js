@@ -1,4 +1,13 @@
 const userModel = require("../models/userSchema");
+const jwt=require("jsonwebtoken");
+
+//creation  Token et apple dans fonction login  || //const MaxAge=2*60*60//2 heures
+const MaxTime=1*60// 1min
+const createToken=(id) => {
+  return jwt.sign({id},"net secret pfe",{expiresIn:"1M"})
+
+}
+
 
 // Create Candidat
 exports.createCandidat = async (req, res) => {
@@ -71,3 +80,17 @@ exports.deleteCandidat = async (req, res) => {
     res.status(500).json({ message: "Error deleting candidat", error: error.message });
   }
 };
+//consomation login
+module.exports.login= async (req,res) => {
+  try {
+      const { email , password } = req.body;
+      const user = await userModel.login(email, password)
+      const token=createToken(user._id)
+      res.cookie("jwt_token_9antra",token,{httpOnly:false,MaxAge:MaxTime})
+      
+      res.status(200).json({user})
+
+  } catch (error) {
+      res.status(500).json({message: error.message});
+  }
+}

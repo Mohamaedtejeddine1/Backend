@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
+
+const { requireAuthUser}=require("../middlewares/authMiddleware")
 const userController = require("../controllers/userController");
 const recruteurController = require("../controllers/recruteurController");
 
-
+router.post("/login", userController.login);
 router.post("/createCandidat", userController.createCandidat);
-router.get("/getAllCandidat", userController.getAllCandidat);
+router.get("/getAllCandidat", requireAuthUser, userController.getAllCandidat);
 router.get("/getCandidatById/:id", userController.getCandidatById);
 router.put("/updateCandidatById/:id",userController.updateCandidatById);
 router.delete("/deleteCandidat/:id", userController.deleteCandidat);

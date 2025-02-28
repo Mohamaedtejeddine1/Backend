@@ -29,8 +29,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use("/os", osRouter);
 app.use("/user",userRouter);
-
-
 app.use("/Gemini", GeminiRouter);
 
 

@@ -59,7 +59,7 @@ exports.updateRecruteurById = async (req, res) => {
     const { id } = req.params;
     const { email, username, password, profil, offre } = req.body;
 
-    // Update the recruiter
+   
     await userModel.findByIdAndUpdate(
       id,
       {
