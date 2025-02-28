@@ -2,9 +2,9 @@ const userModel = require("../models/userSchema");
 const jwt=require("jsonwebtoken");
 
 //creation  Token et apple dans fonction login  || //const MaxAge=2*60*60//2 heures
-const MaxTime=1*60// 1min
+const maxTime=1*60// 1min
 const createToken=(id) => {
-  return jwt.sign({id},"net secret pfe",{expiresIn:"1M"})
+  return jwt.sign({id},"net secret pfe",{expiresIn:maxTime})
 
 }
 
@@ -41,7 +41,7 @@ module.exports.getCandidatById= async (req,res) => {
     try {
         //const id = req.params.id
         const {id} = req.params
-        //console.log(req.params.id)
+        // autre :console.log(req.params.id)
         const user = await userModel.findById(id)
 
         res.status(200).json({user});
@@ -85,12 +85,18 @@ module.exports.login= async (req,res) => {
   try {
       const { email , password } = req.body;
       const user = await userModel.login(email, password)
-      const token=createToken(user._id)
-      res.cookie("jwt_token_9antra",token,{httpOnly:false,MaxAge:MaxTime})
+      const token = createToken(user._id)
+      res.cookie("jwt_token_9antra", token, {httpOnly:false,maxAge:maxTime * 1000})
       
       res.status(200).json({user})
-
   } catch (error) {
       res.status(500).json({message: error.message});
-  }
-}
+  }}
+  module.exports.logout= async (req,res) => {
+    try {
+        res.cookie("jwt_token_9antra", "", {httpOnly:false,maxAge:1})
+        res.status(200).json({ message: "Logged out successfully" });
+
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }}

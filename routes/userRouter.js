@@ -6,6 +6,7 @@ const userController = require("../controllers/userController");
 const recruteurController = require("../controllers/recruteurController");
 
 router.post("/login", userController.login);
+router.post("/logout", userController.logout);
 router.post("/createCandidat", userController.createCandidat);
 router.get("/getAllCandidat", requireAuthUser, userController.getAllCandidat);
 router.get("/getCandidatById/:id", userController.getCandidatById);
