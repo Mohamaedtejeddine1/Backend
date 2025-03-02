@@ -2,7 +2,9 @@ const userModel = require("../models/userSchema");
 const jwt=require("jsonwebtoken");
 
 //creation  Token et apple dans fonction login  || //const MaxAge=2*60*60//2 heures
-const maxTime=1*60// 1min
+//const maxTime=1*60// 1min
+const maxTime=24*60*60// 1min
+
 const createToken=(id) => {
   return jwt.sign({id},"net secret pfe",{expiresIn:maxTime})
 
@@ -49,7 +51,6 @@ module.exports.getCandidatById= async (req,res) => {
         res.status(500).json({message: error.message});
     }
 }
-
 module.exports.updateCandidatById = async (req, res) => {
     try {
         const {id} = req.params
