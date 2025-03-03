@@ -81,6 +81,39 @@ exports.deleteCandidat = async (req, res) => {
     res.status(500).json({ message: "Error deleting candidat", error: error.message });
   }
 };
+//consommation register
+module.exports.register=async (req,res)=>{
+  try{
+  const{username,email,password,role}=req.body;
+  
+  const user=await userModel.register(username,email,password,role)
+
+  const token = createToken(user._id)
+  res.cookie("jwt_token_9antra", token, {httpOnly:false,maxAge:maxTime * 1000})
+  res.status(200).json({user})
+
+  }catch(eroor){
+    res.status(500).json({message:eroor.message})
+  }
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //consomation login
 module.exports.login= async (req,res) => {
   try {

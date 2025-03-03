@@ -29,17 +29,10 @@ const userSchema = new mongoose.Schema(
     },
     profil:{type:String },//for recuiter 
     offre:{type:String},//for recuiter 
-    cv: { type: String, require: false, default: "cv.png", required:function() {return this.role==="candidat";}   },//for candidat 
-    lettreMotivation: { type: String, require: false, default: "lettreMotivation.png" ,required:function() {return this.role==="candidat";} },//for candidat 
-    
-    experiences: {
-        type: String,
-        required: function () {
-          return this.role === "candidat";
-        },
-      },
-     competance :{type: String,}, // for condidat
-     etat :Boolean
+    cv: { type: String },
+    lettreMotivation: { type: String },
+    experiences: [{ type: String  ,}], // keep as array so future updates work.
+    competance: [{type: String}]
   },
 
   { timestamps: true }
@@ -109,6 +102,20 @@ userSchema.statics.login = async function (email, password) {
   } else {
     throw new Error("email not found");
   }
+};
+userSchema.statics.register = async function (username, email, password, role) {
+  if (!["candidat", "recruteur"].includes(role)) {
+    throw new Error("Invalid role");
+  }
+
+  const existingUser = await this.findOne({ email });
+  if (existingUser) {
+    throw new Error("Email already in use");
+  }
+
+  const user = new this({ username, email, password, role });
+  await user.save();
+  return user;
 };
 
 const User = mongoose.model("User", userSchema);
