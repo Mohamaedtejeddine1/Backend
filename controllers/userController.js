@@ -1,137 +1,128 @@
 const userModel = require("../models/userSchema");
-const jwt=require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 
-//creation  Token et apple dans fonction login  || //const MaxAge=2*60*60//2 heures
-//const maxTime=1*60// 1min
-const maxTime=24*60*60// 1min
+const maxTime = 24 * 60 * 60;
+const createToken = (id) => jwt.sign({ id }, "net secret pfe", { expiresIn: maxTime });
 
-const createToken=(id) => {
-  return jwt.sign({id},"net secret pfe",{expiresIn:maxTime})
+// Create User (Candidat or Recruteur)
+exports.createUser = async (req, res) => {
+    try {
+        const { username, email, password, role, profil, offre, cv, lettreMotivation, experiences, competance } = req.body;
+        
+        if (role !== "candidat" && role !== "recruteur") {
+            return res.status(400).json({ message: "Role must be 'candidat' or 'recruteur'" });
+        }
 
-}
+        const user = await userModel.create({
+            username,
+            email,
+            password,
+            role,
+        //     profil,
+    
+        //     cv,
+        //     lettreMotivation,
+        //     experiences,
+        //     competance
+        // 
+        });
 
-
-// Create Candidat
-exports.createCandidat = async (req, res) => {
-  try {
-    const { username, email, password, role,  cv, lettreMotivation, experiences, competance } = req.body;
-    if (role !== "candidat") {
-      return res.status(400).json({ message: "Role must be 'candidat'" });
+        res.status(201).json({ message: "User created successfully", user });
+    } catch (error) {
+        res.status(500).json({ message: "Error creating user", error: error.message });
     }
-    const user=await userModel.create({
-        username,email,password,role,cv, lettreMotivation, experiences, competance
-    })
-  
-    res.status(201).json({ message: "Candidat created successfully", user});
-  } catch (error) {
-    res.status(500).json({ message: "Error creating candidat", error: error.message });
-  }
 };
 
-// Read Candidat
-module.exports.getAllCandidat= async (req,res) => {
+// Get all users
+exports.getAllUsers = async (req, res) => {
     try {
-
-        const list= await userModel.find({role:"candidat"})
-
-        res.status(200).json({list});
+        const users = await userModel.find();
+        res.status(200).json({ users });
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.status(500).json({ message: error.message });
     }
-}
-module.exports.getCandidatById= async (req,res) => {
-    try {
-        //const id = req.params.id
-        const {id} = req.params
-        // autre :console.log(req.params.id)
-        const user = await userModel.findById(id)
-
-        res.status(200).json({user});
-    } catch (error) {
-        res.status(500).json({message: error.message});
-    }
-}
-module.exports.updateCandidatById = async (req, res) => {
-    try {
-        const {id} = req.params
-        const {email , username,password,cv,lettreMotivation,experiences,competance} = req.body;
-    
-        await userModel.findByIdAndUpdate(id,{$set :{ username, email, password, cv, lettreMotivation, experiences, competance },
-        })
-        const updated = await userModel.findById(id)
-    
-        res.status(200).json({updated})
-    } catch (error) {
-        res.status(500).json({message: error.message});
-    }
-    }
-    
-
-
-// Delete Candidat
-exports.deleteCandidat = async (req, res) => {
-  try {
-    const id=req.params.id;
-    const candidat = await userModel.findOneAndDelete(id);
-    if (!candidat) {
-      return res.status(404).json({ message: "Candidat not found" });
-    }
-    res.status(200).json({ message: "Candidat deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting candidat", error: error.message });
-  }
 };
-//consommation register
-module.exports.register=async (req,res)=>{
-  try{
-  const{username,email,password,role}=req.body;
-  
-  const user=await userModel.register(username,email,password,role)
 
-  const token = createToken(user._id)
-  res.cookie("jwt_token_9antra", token, {httpOnly:false,maxAge:maxTime * 1000})
-  res.status(200).json({user})
-
-  }catch(eroor){
-    res.status(500).json({message:eroor.message})
-  }
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//consomation login
-module.exports.login= async (req,res) => {
-  try {
-      const { email , password } = req.body;
-      const user = await userModel.login(email, password)
-      const token = createToken(user._id)
-      res.cookie("jwt_token_9antra", token, {httpOnly:false,maxAge:maxTime * 1000})
-      
-      res.status(200).json({user})
-  } catch (error) {
-      res.status(500).json({message: error.message});
-  }}
-  module.exports.logout= async (req,res) => {
+// Get user by ID
+exports.getUserById = async (req, res) => {
     try {
-      
-        res.cookie("jwt_token_9antra", "", {httpOnly:false,maxAge:1})
-        res.status(200).json({ message: "Logged out successfully " });
+        const { id } = req.params;
+        const user = await userModel.findById(id);
 
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ user });
     } catch (error) {
-        res.status(500).json({message: error.message});
-    }}
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Update User
+exports.updateUserById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedUser = await userModel.findByIdAndUpdate(id, req.body, { new: true });
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ updatedUser });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Delete User
+exports.deleteUserById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedUser = await userModel.findByIdAndDelete(id);
+
+        if (!deletedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Register User
+exports.register = async (req, res) => {
+    try {
+        const { username, email, password, role } = req.body;
+        const user = await userModel.create({ username, email, password, role });
+        const token = createToken(user._id);
+        res.cookie("jwt_token_9antra", token, { httpOnly: false, maxAge: maxTime * 1000 });
+        res.status(200).json({ user });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Login User
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await userModel.login(email, password);
+        const token = createToken(user._id);
+        res.cookie("jwt_token_9antra", token, { httpOnly: false, maxAge: maxTime * 2000 });
+        res.status(200).json({ user });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Logout User
+exports.logout = async (req, res) => {
+    try {
+        res.cookie("jwt_token_9antra", "", { httpOnly: false, maxAge: 1 });
+        res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
