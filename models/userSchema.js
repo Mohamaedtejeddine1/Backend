@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: [ "candidat", "recruteur"],
+      enum: [  "candidat", "recruteur"],
     },
     profil:{type:String },//for recuiter 
     offre:{type:String},//for recuiter 
