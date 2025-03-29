@@ -1,16 +1,20 @@
 const userModel = require("../models/userSchema");
-const jwt = require("jsonwebtoken");
+const authMiddleware=require("../middlewares/authMiddleware")
+const jwt = require('jsonwebtoken');
 
-const maxTime = 24 * 60 * 60;
-const createToken = (id) => jwt.sign({ id }, "net secret pfe", { expiresIn: maxTime });
 
+const maxTime = 24 *60 * 60 //24H
+//const maxTime = 1 * 60 //1min
+const createToken = (id) => {
+    return jwt.sign({id},'net secret pfe', {expiresIn: maxTime })
+}
 // Create User (Candidat or Recruteur)
 exports.createUser = async (req, res) => {
     try {
         const { username, email, password, role, profil, offre, cv, lettreMotivation, experiences, competance } = req.body;
         
-        if (role !== "candidat" && role !== "recruteur") {
-            return res.status(400).json({ message: "Role must be 'candidat' or 'recruteur'" });
+        if (role !== "candidat" && role !== "recruteur" && role !== "admin") {
+            return res.status(400).json({ message: "Role must be 'candidat' or 'recruteur' or 'admin" });
         }
 
         const user = await userModel.create({
@@ -18,6 +22,7 @@ exports.createUser = async (req, res) => {
             email,
             password,
             role,
+
         //     profil,
     
         //     cv,
@@ -34,15 +39,14 @@ exports.createUser = async (req, res) => {
 };
 
 // Get all users
-exports.getAllUsers = async (req, res) => {
+module.exports.getAllUsers= async (req,res) => {
     try {
-        const users = await userModel.find();
-        res.status(200).json({ users });
+        const userListe = await userModel.find()
+        res.status(200).json({userListe});
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({message: error.message});
     }
-};
-
+}
 // Get user by ID
 exports.getUserById = async (req, res) => {
     try {
@@ -104,25 +108,25 @@ exports.register = async (req, res) => {
     }
 };
 
-// Login User
-exports.login = async (req, res) => {
+module.exports.login= async (req,res) => {
     try {
-        const { email, password } = req.body;
-        const user = await userModel.login(email, password);
-        const token = createToken(user._id);
-        res.cookie("jwt_token_9antra", token, { httpOnly: false, maxAge: maxTime * 2000 });
-        res.status(200).json({ user });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+        const { email , password } = req.body;
+        const user = await userModel.login(email, password)
+        const token = createToken(user._id)
+        res.cookie("jwt_token_9antra", token, {httpOnly:false,maxAge:maxTime * 1000})
+        res.status(200).json({user,token})
 
-// Logout User
-exports.logout = async (req, res) => {
-    try {
-        res.cookie("jwt_token_9antra", "", { httpOnly: false, maxAge: 1 });
-        res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({message: error.message});
     }
-};
+}
+
+module.exports.logout= async (req,res) => {
+    try {
+  
+        res.cookie("jwt_token_9antra", "", {httpOnly:false,maxAge:1})
+        res.status(200).json("logged")
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+}

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const userSchema = new mongoose.Schema(
-  {
+  { // par choix  image: { type: String },
     username: {
       type: String,
       required: false,
@@ -25,15 +25,17 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: [  "candidat", "recruteur"],
+      enum: [  "admin","candidat", "recruteur"],
     },
     profil:{type:String },//for recuiter 
     offre:{type:String},//for recuiter 
     cv: { type: String },
     lettreMotivation: { type: String },
     experiences: [{ type: String  ,}], // keep as array so future updates work.
-    competance: [{type: String}]
+    competance: [{type: String}],
+    offres:[{type:mongoose.Schema.ObjectId,ref:"offre"}]
   },
+ 
 
   { timestamps: true }
 );

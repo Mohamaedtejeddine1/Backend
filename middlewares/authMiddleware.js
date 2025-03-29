@@ -1,28 +1,20 @@
 const jwt = require("jsonwebtoken");
-const userModel = require("../models/userSchema");
-const session=require("express-session")
-const cors = require("cors");
+const secretKey = "net secret pfe"; // Make sure this matches your token generation key
 
-const requireAuthUser = (req, res, next) => {
-   const token = req.cookies.jwt_token_9antra;
+exports.requireAuthUser = (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
-  //const authHeader = req.headers.authorization;
-  //const token = authHeader && authHeader.split(" ")[1];
-  // console.log("token", token);
-  if (token) {
-    jwt.verify(token, 'net secret pfe', async (err, decodedToken) => {
-      if (err) {
-        console.log("il ya une erreur au niveau du token", err.message);
-        req.session = null;  //session null
-        res.json("/Problem_token");
-      } else {
-        req.session= await userModel.findById(decodedToken.id); //session feha user
-        next();
-      }
-    });
-  } else {
-   req.session.user = null; //session null
-    res.json("/pas_de_token");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Unauthorized: No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    req.user = decoded; // Attach decoded user to request
+    next();
+  } catch (error) {
+    return res.status(403).json({ message: "Forbidden: Invalid token" });
   }
 };
-module.exports = { requireAuthUser };

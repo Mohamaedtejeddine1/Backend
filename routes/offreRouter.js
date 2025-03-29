@@ -1,25 +1,14 @@
 const express = require("express");
+const { createOffre, getAllOffres, getOffreById, updateOffre, deleteOffre } = require("../controllers/offreController");
+const { requireAuthUser } = require("../middlewares/authMiddleware"); // Import the middleware
+
 const router = express.Router();
-const offreController = require("../controllers/offreController");
-//const recruteurController = require('../controllers/recruteurController');
 
 
-// routes for offre
-
-router.post("/createOffre", offreController.createOffre);
-router.get("/getAllOffres", offreController.getAllOffres);
-router.get("/getAllOffres/:id", offreController.getAllOffres);
-router.put("/updateOffre/:id", offreController.updateOffre);
-router.delete("/deleteOffre/:id", offreController.deleteOffre);
-
-// routes postjob  wath7a
-
-
-
-
-
-
-module.exports = router;
-
+router.post("/createOffre", requireAuthUser, createOffre); 
+router.get("/getAllOffres",requireAuthUser, getAllOffres); 
+router.get("/getOffreById/:id",requireAuthUser, getOffreById); 
+router.put("/updateOffre/:id", requireAuthUser, updateOffre); 
+router.delete("/deleteOffre/:id", requireAuthUser, deleteOffre); 
 
 module.exports = router;
