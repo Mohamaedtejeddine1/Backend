@@ -5,7 +5,7 @@ const { requireAuthUser } = require("../middlewares/authMiddleware"); // Import 
 const router = express.Router();
 
 
-router.post("/createOffre", requireAuthUser, createOffre); 
+router.post("/createOffre",requireAuthUser, createOffre); 
 router.get("/getAllOffres",requireAuthUser, getAllOffres); 
 router.get("/getOffreById/:id",requireAuthUser, getOffreById); 
 router.put("/updateOffre/:id", requireAuthUser, updateOffre); 

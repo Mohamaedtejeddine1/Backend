@@ -3,15 +3,35 @@ const Offre = require("../models/offreSchema");
 
 module.exports.createOffre = async (req, res) => {
     try {
-        const {titre,description,comptetance,domaine,departement}=req.body;
-        const offre=await Offre.create({titre,description,comptetance,domaine,departement})
+        if (req.user.role === "recruteur") {
+            return res.status(403).json({ message: "Only recruiters can create offers" });
+        }
 
-        
+        const { titre, description, competance, domaine, departement } = req.body;
+        const offre = await Offre.create({
+            titre,
+            description,
+            competance,
+            domaine,
+            departement,
+            recrut: req.user.id, 
+        });
+
         res.status(201).json(offre);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
+
+
+
+
+
+
+
+
+
+
 
 exports.getAllOffres = async (req, res) => {
     try {
