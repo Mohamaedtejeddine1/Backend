@@ -13,6 +13,7 @@ exports.requireAuthUser = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, secretKey);
     req.user = decoded; 
+    req.user._id
     req.user.role ="candidat,recruteur"
     next();
   } catch (error) {

@@ -9,14 +9,14 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: true,
+ 
       unique: true,
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
       minLength: 8,
       match: [
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
@@ -31,14 +31,26 @@ const userSchema = new mongoose.Schema(
     offre:{type:String},//for recuiter 
     cv: { type: String },
     lettreMotivation: { type: String },
-    experiences: [{ type: String  ,}], // keep as array so future updates work.
+     experiences: [{ type: String  ,}], // keep as array so future updates work.
     competance: [{type: String}],
-    offres:[{type:mongoose.Schema.ObjectId,ref:"offre"}]
+    offres:[{type:mongoose.Schema.ObjectId,ref:"offre"}],
+    
+    
   },
  
-
+   
   { timestamps: true }
 );
+
+
+
+
+
+
+
+
+
+
 
 userSchema.pre("save", async function (next) {
   try {

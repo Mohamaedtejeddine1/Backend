@@ -18,6 +18,8 @@ var userRouter = require("./routes/userRouter");
 var offreRouter = require("./routes/offreRouter");
 
 
+
+
 var GeminiRouter = require("./routes/GeminiRouter");
 
 var app = express();
@@ -53,8 +55,8 @@ app.use(session({   //cobfig session
 
 app.use("/", indexRouter);
 app.use("/users", userRouter);
-app.use("/offres", offreRouter);
 
+app.use("/offres", offreRouter);
 app.use("/Gemini", GeminiRouter);
 
 // catch 404 and forward to error handler

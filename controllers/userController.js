@@ -38,6 +38,44 @@ exports.createUser = async (req, res) => {
     }
 };
 
+
+exports.updateCandidatDetails = async (req, res) => {
+    const { id } = req.params; 
+    const updates = req.body; 
+  
+    try {
+      const user = await userModel.findById(id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      if (user.role !== "candidat") {
+        return res.status(403).json({ error: "Operation only allowed for 'candidat' role" });
+      }
+
+      const updatedUser = await userModel.findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            cv: updates.cv,
+            competance: updates.competance,
+            experiences: updates.experiences,
+          },
+        },
+        { new: true, runValidators: true } // Ensure only updated fields are validated
+      );
+  
+      res.status(200).json({
+        message: " updated successfully",
+        updatedUser,
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+  
+
+
+
 // Get all users
 module.exports.getAllUsers= async (req,res) => {
     try {
@@ -78,6 +116,20 @@ exports.updateUserById = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+module.exports.addUserClientWithImg = async (req,res) => {
+    try {
+        const {competance ,experiences  } = req.body;
+        const roleClient = 'candidat'
+        const {filename} = req.file
+
+        const user = await userModel.create({
+           competance ,experiences,role :roleClient , cv: filename
+        })
+        res.status(200).json({user});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+}
 
 // Delete User
 exports.deleteUserById = async (req, res) => {
