@@ -7,7 +7,9 @@ const offreSchema = new mongoose.Schema({
   domaine: { type: String, required: true },
   departement: { type: String, required: true },
   status: { type: String, enum: ["open", "close"], default: "open" },
-  recrut: { type: mongoose.Schema.ObjectId, ref: "User" } // Recruiter who posted the offer
+  recrut: { type: mongoose.Schema.ObjectId, ref: "User" } ,
+  candidat: { type: mongoose.Schema.ObjectId, ref: "User" },
+  
 });
 
 const Offre = mongoose.model('Offre', offreSchema);

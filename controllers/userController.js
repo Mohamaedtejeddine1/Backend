@@ -1,7 +1,9 @@
+
 const userModel = require("../models/userSchema");
 const authMiddleware=require("../middlewares/authMiddleware")
 const jwt = require('jsonwebtoken');
-
+const cloudinary = require('../utils/cloudinary').v2; 
+const fs = require('fs'); 
 
 const maxTime = 24 *60 * 60 //24H
 //const maxTime = 1 * 60 //1min
@@ -182,3 +184,101 @@ module.exports.logout= async (req,res) => {
         res.status(500).json({message: error.message});
     }
 }
+
+exports.updateCandidatDetails = async (req, res) => {
+    try {
+      let updateData = {
+        competance: req.body.competance,
+        experiences: req.body.experiences,
+      };
+  
+  
+      if (req.body.cv) {
+        updateData.cv = req.body.cv;
+      }
+  
+     
+      await userModel.findByIdAndUpdate(req.params.id, updateData);
+  
+      res.status(200).json({ success: true, message: "Details updated successfully!" });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+  exports.updateProfil = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { username, email, experiences, competance } = req.body;
+  
+      // Update profile details
+      const updatedCandidat = await userModel.findByIdAndUpdate(
+        id,
+        {
+          username,
+          email,
+          experiences,   // Changed to plural as per the request
+          competance,    // Corrected spelling for "competence"
+        },
+        { new: true }
+      );
+  
+      if (!updatedCandidat) {
+        return res.status(404).json({ message: 'Candidate not found' });
+      }
+  
+      return res.status(200).json({
+        message: 'Profile updated successfully',
+        updatedCandidat,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Error updating profile', error });
+    }
+  };
+  
+  
+exports.postulerOffre = async (req, res) => {
+    try {
+      const { userId, offreId } = req.body;
+  
+      // Vérifier si l'offre existe
+      const offre = await Offre.findById(offreId);
+      if (!offre) {
+        return res.status(404).json({ message: "Offre introuvable" });
+      }
+  
+      // Vérifier si le candidat existe
+      const candidat = await User.findById(userId);
+      if (!candidat) {
+        return res.status(404).json({ message: "Candidat introuvable" });
+      }
+  
+      // Vérifier si l'offre est déjà ajoutée
+      const alreadyApplied = candidat.offres.some(
+        (item) => item.offreId.toString() === offre._id.toString()
+      );
+  
+      if (!alreadyApplied) {
+        // Ajouter l'ID et le titre dans le tableau
+        candidat.offres.push({
+          offreId: offre._id,
+          titre: offre.titre
+        });
+  
+        await candidat.save();
+      }
+  
+      // Mettre à jour le champ `candidat` dans l'offre si besoin
+      offre.candidat = candidat._id;
+      await offre.save();
+  
+      res.status(200).json({
+        message: "Candidature enregistrée",
+        user: candidat,
+      });
+  
+    } catch (error) {
+      console.error("Erreur postulation :", error);
+      res.status(500).json({ message: "Erreur serveur", error });
+    }
+  };

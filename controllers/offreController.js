@@ -1,10 +1,12 @@
 const Offre = require("../models/offreSchema"); 
 
 
+
+
+
 module.exports.createOffre = async (req, res) => {
     try {
         if (req.user.role === "recruteur") {
-            return res.status(403).json({ message: "Only recruiters can create offers" });
         }
 
         const { titre, description, competance, domaine, departement } = req.body;
@@ -15,6 +17,7 @@ module.exports.createOffre = async (req, res) => {
             domaine,
             departement,
             recrut: req.user.id, 
+            
         });
 
         res.status(201).json(offre);

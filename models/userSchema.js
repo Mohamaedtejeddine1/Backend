@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const userSchema = new mongoose.Schema(
-  { // par choix  image: { type: String },
+  { profileImage:{String},
     username: {
       type: String,
       required: false,
@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
     },
+    cv: { type: String },
     password: {
       type: String,
       // required: true,
@@ -27,9 +28,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: [  "admin","candidat", "recruteur"],
     },
-    profil:{type:String },//for recuiter 
-    offre:{type:String},//for recuiter 
-    cv: { type: String },
+    profil:{type:String },
+    offres: [
+      {
+        type: String, 
+      }
+    ],
+ 
     lettreMotivation: { type: String },
      experiences: [{ type: String  ,}], // keep as array so future updates work.
     competance: [{type: String}],

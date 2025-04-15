@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const upload = require('../middlewares/uploadFile');
 const { requireAuthUser}=require("../middlewares/authMiddleware");
+
 const userController= require("../controllers/userController");
 
 router.post("/register",userController.register);
@@ -13,11 +14,18 @@ router.get("/getAllUsers",/* requireAuthUser*/userController.getAllUsers);
  router.get("/getUserById/:id", userController.getUserById);
  router.put("/updateUserById/:id",userController.updateUserById);
 router.delete("/deleteUserById/:id", userController.deleteUserById);
-router.put(
-    "/updateCandidatDetails/:id",
-      
-    userController.updateCandidatDetails
+router.post('/postuler', userController.postulerOffre);
+router.put('/updateCandidatDetails/:id', upload.single('cv'), userController.updateCandidatDetails);
+
+
+  router.put(
+    "/updateProfil/:id", 
+  
+
+    userController.updateProfil
   );
+
+
   
 
 module.exports = router;
