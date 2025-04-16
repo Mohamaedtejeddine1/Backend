@@ -14,10 +14,9 @@ router.get("/getAllUsers",/* requireAuthUser*/userController.getAllUsers);
  router.get("/getUserById/:id", userController.getUserById);
  router.put("/updateUserById/:id",userController.updateUserById);
 router.delete("/deleteUserById/:id", userController.deleteUserById);
-router.post('/postuler', userController.postulerOffre);
 router.put('/updateCandidatDetails/:id', upload.single('cv'), userController.updateCandidatDetails);
 
-
+router.post("/postuler",userController.postuler)
   router.put(
     "/updateProfil/:id", 
   
