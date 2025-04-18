@@ -1,6 +1,5 @@
 const Offre = require("../models/offreSchema"); 
-
-
+const userModel = require("../models/userSchema");
 
 
 

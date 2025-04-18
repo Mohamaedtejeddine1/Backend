@@ -189,11 +189,14 @@ module.exports.logout= async (req,res) => {
 
 exports.updateCandidatDetails = async (req, res) => {
     try {
+    
       let updateData = {
         competance: req.body.competance,
         experiences: req.body.experiences,
+       
+
+
       };
-  
   
       if (req.body.cv) {
         updateData.cv = req.body.cv;
@@ -201,7 +204,6 @@ exports.updateCandidatDetails = async (req, res) => {
   
      
       await userModel.findByIdAndUpdate(req.params.id, updateData);
-  
       res.status(200).json({ success: true, message: "Details updated successfully!",updateData });
       
     } catch (error) {
@@ -225,6 +227,7 @@ exports.updateCandidatDetails = async (req, res) => {
         },
         { new: true }
       );
+      
   
       if (!updatedCandidat) {
         return res.status(404).json({ message: 'Candidate not found' });
@@ -241,46 +244,42 @@ exports.updateCandidatDetails = async (req, res) => {
       return res.status(500).json({ message: 'Error updating profile', error });
     }
   };
-
- exports.postuler = async (req, res) => {
-  try {
-    const { userId, offreId } = req.body;
-
-    if (!userId || !offreId) {
-      return res.status(400).json({ message: "User ID and Offer ID are required." });
-    }
-
-    const user = await userModel.findById(userId);
-    const offre = await Offre.findById(offreId);
-
-    if (!user) return res.status(404).json({ message: "User not found." });
-    if (!offre) return res.status(404).json({ message: "Offer not found." });
-
-    // Ensure user's offres array exists
-    user.offres = user.offres || [];
-
-    // Check if the offer was already applied for
-    const alreadyApplied = user.offres.some(entry => entry.toString() === offreId);
-    if (alreadyApplied) {
-      return res.status(400).json({ message: "User has already applied to this offer." });
-    }
-
-    // Add the offer's ObjectId to the user's offres array
-    user.offres.push(offre._id);  // Just add the _id directly
-
-    await user.save();
-
-    return res.status(200).json({
-      message: "Application successful!",
-      user,
-    });
-  } catch (error) {
-    console.error("Error while applying:", error);
-    return res.status(500).json({
-      message: "Server error.",
-      error: error.message,
-    });
-  }
-};
+  exports.postuler = async (req, res) => {
+    try {
+      let { userId, offreId } = req.body;
 
   
+      userId = userId.trim();
+      offreId = offreId.trim();
+  
+      const user = await userModel.findById(userId);
+      const offre = await Offre.findById(offreId);
+  
+      if (!user || !offre) {
+        return res.status(404).json({ message: "User or Offer not found" });
+      }
+  
+      if (!user.offres.includes(offre._id)) {
+        user.offres.push(offre);
+        user.offres.push(offre._id);
+        
+      }
+  
+      if (!offre.candidats.includes(user._id)) {
+        offre.candidats.push(user);
+        
+
+      }
+  
+      await user.save({ validateBeforeSave: false });
+      await offre.save();
+  
+      res.status(200).json({ message: "Application successful", user, offre });
+    } catch (err) {
+      console.error("Postuler error:", err);
+      res.status(500).json({ message: "Something went wrong", error: err.message });
+    }
+  };
+  
+
+

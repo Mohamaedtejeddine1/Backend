@@ -29,18 +29,20 @@ const userSchema = new mongoose.Schema(
       enum: [  "admin","candidat", "recruteur"],
     },
     profil:{type:String },
-    
-    offres: [
-      {
-        id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Offre',
-          required: true,
-        },
-      },
-    ],
-    
- 
+ offres: [
+  {
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Offre",
+      required: true,
+    },
+    title:[{
+      
+    }]
+  },
+],
+
+
     lettreMotivation: { type: String },
      experiences: [{ type: String  ,}], // keep as array so future updates work.
     competance: [{type: String}],

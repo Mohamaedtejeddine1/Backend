@@ -8,7 +8,21 @@ const offreSchema = new mongoose.Schema({
   departement: { type: String, required: true },
   status: { type: String, enum: ["open", "close"], default: "open" },
   recrut: { type: mongoose.Schema.ObjectId, ref: "User" } ,
-  candidat: { type: mongoose.Schema.ObjectId, ref: "User" },
+  candidats: [
+    {
+      user: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+      },
+      username: String,
+      experiences:[{}],
+      competance:[{}],
+
+
+      appliedAt: { type: Date, default: Date.now },
+    },
+  ],
+  
   
 });
 

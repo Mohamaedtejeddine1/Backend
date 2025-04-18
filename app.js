@@ -74,6 +74,14 @@ app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render("error");
 });
+// Replace your error handler with this:
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Something went wrong!',
+    });
+  });
 
 const server = http.createServer(app); //2
 server.listen(process.env.PORT || 5000, () => {

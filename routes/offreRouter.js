@@ -10,5 +10,7 @@ router.get("/getAllOffres",requireAuthUser, getAllOffres);
 router.get("/getOffreById/:id",requireAuthUser, getOffreById); 
 router.put("/updateOffre/:id", requireAuthUser, updateOffre); 
 router.delete("/deleteOffre/:id", requireAuthUser, deleteOffre); 
-// router.post("/postuler/:id", postuler);
+
+
+
 module.exports = router;

@@ -16,15 +16,16 @@ router.get("/getAllUsers",/* requireAuthUser*/userController.getAllUsers);
 router.delete("/deleteUserById/:id", userController.deleteUserById);
 router.put('/updateCandidatDetails/:id', upload.single('cv'), userController.updateCandidatDetails);
 
-router.post("/postuler",userController.postuler)
   router.put(
     "/updateProfil/:id", 
   
 
     userController.updateProfil
   );
-
-
   
+  router.post("/postuler", userController.postuler);    
+
 
 module.exports = router;
+
+
