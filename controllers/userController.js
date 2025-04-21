@@ -2,7 +2,6 @@ const mongoose = require('mongoose'); // Add this line at the very top
 const userModel = require("../models/userSchema");
 const authMiddleware=require("../middlewares/authMiddleware")
 const jwt = require('jsonwebtoken');
-const cloudinary = require('../utils/cloudinary').v2; 
 const fs = require('fs'); 
 const Offre=require("../models/offreSchema")
 
@@ -210,6 +209,12 @@ exports.updateCandidatDetails = async (req, res) => {
       res.status(500).json({ error: error.message });
     }
   };
+
+
+
+
+
+
   exports.updateProfil = async (req, res) => {
     try {
     
@@ -283,3 +288,52 @@ exports.updateCandidatDetails = async (req, res) => {
   
 
 
+exports.postulerA = async (req, res) => {
+  try {
+    const { username,email, competance, experiences,telephone,currentPosition ,Motivationletter} = req.body;
+    const { userId, offreId } = req.params;
+// kn  mawjoud
+    const user = await userModel.findById(userId);
+    const offre = await Offre.findById(offreId);
+
+    if (!user || !offre) {
+      return res.status(404).json({ message: "User or Offer not found" });
+    }
+//
+    const updateData = {
+      username,
+      competance,
+      experiences,
+      telephone,
+      currentPosition,
+      Motivationletter,
+      email
+ 
+    };
+    await userModel.findByIdAndUpdate(userId, updateData);
+
+    // Prevent duplicate entries
+    if (!user.offres.includes(offre._id)) {
+      user.offres.push(offre._id);
+      user.offres.push(offre);
+    }
+
+    if (!offre.candidats.includes(user._id)) {
+      offre.candidats.push(updateData);
+    }
+
+    await user.save({ validateBeforeSave: false });
+    await offre.save();
+
+    res.status(200).json({
+      message: "Application successful",
+      userUpdate: updateData,
+      user,
+      offre,
+    });
+
+  } catch (err) {
+    console.error("Postuler error:", err);
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};

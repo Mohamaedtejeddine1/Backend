@@ -1,19 +1,35 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const userSchema = new mongoose.Schema(
-  { profileImage:{String},
+  {
+    profileImage: { String },
     username: {
       type: String,
       required: false,
       unique: true,
     },
+    telephone: {
+      type: String
+    }
+    ,
     email: {
       type: String,
- 
+
       unique: true,
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
     },
+    // In your userSchema (e.g., User.js)
+    telephone: {
+      type: String,
+      required: false, // set to true if mandatory
+    },
+
+    currentPosition: {
+      type: String,
+      required: false,
+    },
+
     cv: { type: String },
     password: {
       type: String,
@@ -26,32 +42,32 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: [  "admin","candidat", "recruteur"],
+      enum: ["admin", "candidat", "recruteur"],
     },
-    profil:{type:String },
- offres: [
-  {
-    id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Offre",
-      required: true,
-    },
-    title:[{
-      
-    }]
-  },
-],
+    profil: { type: String },
+    offres: [
+      {
+        id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Offre",
+          required: true,
+        },
+        title: [{
+
+        }]
+      },
+    ],
 
 
-    lettreMotivation: { type: String },
-     experiences: [{ type: String  ,}], // keep as array so future updates work.
-    competance: [{type: String}],
-    offres:[{type:mongoose.Schema.ObjectId,ref:"offre"}],
-    
-    
+    Motivationletter: { type: String },
+    experiences: [{ type: String, }], // keep as array so future updates work.
+    competance: [{ type: String }],
+    offres: [{ type: mongoose.Schema.ObjectId, ref: "offre" }],
+
+
   },
- 
-   
+
+
   { timestamps: true }
 );
 
@@ -108,15 +124,15 @@ userSchema.statics.login = async function (email, password) {
 };*/
 userSchema.statics.login = async function (email, password) {
   //console.log(email, password);
-  const user = await this.findOne({email});
- // console.log(user)
+  const user = await this.findOne({ email });
+  // console.log(user)
   if (user) {
     const auth = await bcrypt.compare(password, user.password);
     //console.log(auth)
     if (auth) {
       // if (user.etat === true) {
       //   if (user.ban === false) {
-          return user;
+      return user;
       //   } else {
       //     throw new Error("ban");
       //   }
@@ -124,7 +140,7 @@ userSchema.statics.login = async function (email, password) {
       //   throw new Error("compte desactive ");
       // }
     } else {
-      throw new Error("password invalid"); 
+      throw new Error("password invalid");
     }
   } else {
     throw new Error("email not found");

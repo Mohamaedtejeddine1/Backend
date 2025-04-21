@@ -23,7 +23,9 @@ router.put('/updateCandidatDetails/:id', upload.single('cv'), userController.upd
     userController.updateProfil
   );
   
-  router.post("/postuler", userController.postuler);    
+  router.post("/postuler", userController.postuler);   
+  router.post('/postulerA/:userId/:offreId', upload.single("cv") ,userController.postulerA);
+ 
 
 
 module.exports = router;

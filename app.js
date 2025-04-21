@@ -1,90 +1,81 @@
-// backend/app.js
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
-const session = require("express-session"); //session
-const { connectToMongoDb } = require("./config/db");
+
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+const session = require("express-session");
 const cors = require("cors");
+const http = require("http");
 require("dotenv").config();
 
-const logMiddleware = require('./middlewares/logsMiddlewares.js'); //log
+const { connectToMongoDb } = require("./config/db");
+const logMiddleware = require("./middlewares/logsMiddlewares.js");
 
-const http = require("http"); //1
+const indexRouter = require("./routes/indexRouter");
+const userRouter = require("./routes/userRouter");
+const offreRouter = require("./routes/offreRouter");
+const GeminiRouter = require("./routes/GeminiRouter");
 
-var indexRouter = require("./routes/indexRouter");
-var userRouter = require("./routes/userRouter");
-var offreRouter = require("./routes/offreRouter");
+const app = express();
 
-
-
-
-var GeminiRouter = require("./routes/GeminiRouter");
-
-var app = express();
-
-// view engine setup (assuming you might have a views folder)
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-
+// Middlewares
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(logMiddleware);
 
-app.use(logMiddleware)    //log
-
-app.use(cors({
+// CORS Configuration
+app.use(
+  cors({
     origin: "http://localhost:3000",
     methods: "GET,POST,PUT,DELETE",
-    credentials: true, // This is crucial for cookies
-    allowedHeaders: ["Content-Type", "Authorization"]
-}));
-app.use(session({   //cobfig session
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+const morgan = require('morgan');
+app.use(morgan('dev'));
+
+
+// Session Setup
+app.use(
+  session({
     secret: "net secret pfe",
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: {secure: false},
-      maxAge: 24*60*60,
-    
-    },  
-  }))
+      secure: false,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
 
+// Routes
 app.use("/", indexRouter);
 app.use("/users", userRouter);
-
 app.use("/offres", offreRouter);
 app.use("/Gemini", GeminiRouter);
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-    next(createError(404));
+// Catch 404 (Not Found)
+app.use((req, res, next) => {
+  next(createError(404, "Resource Not Found"));
 });
 
-// error handler
-app.use(function (err, req, res, next) {
-    // set locals, only providing error in development
-    res.locals.message = err.message;
-    res.locals.error = req.app.get("env") === "development" ? err : {};
-
-    // render the error page
-    res.status(err.status || 500);
-    res.render("error");
-});
-// Replace your error handler with this:
+// Error Handler (JSON only)
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({
-      success: false,
-      message: err.message || 'Something went wrong!',
-    });
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Something went wrong!",
   });
+});
 
-const server = http.createServer(app); //2
+// Server
+const server = http.createServer(app);
 server.listen(process.env.PORT || 5000, () => {
-    connectToMongoDb()
-    console.log("app is running on port " + (process.env.PORT || 5000));
+  connectToMongoDb();
+  console.log("App is running on port " + (process.env.PORT || 5000));
 });
