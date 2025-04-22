@@ -286,54 +286,72 @@ exports.updateCandidatDetails = async (req, res) => {
     }
   };
   
+  const cloudinary = require("../utils/cloudinary"); // or wherever your config is
 
+  
+  exports.postulerA = async (req, res) => {
+    try {
+      const { username, email, competance, experiences, telephone, currentPosition, Motivationletter } = req.body;
+      const { userId, offreId } = req.params;
+  
+      const user = await userModel.findById(userId);
+      const offre = await Offre.findById(offreId);
+  
+      if (!user || !offre) {
+        return res.status(404).json({ message: "User or Offer not found" });
+      }
+  
+      // Get CV link from Cloudinary
+      let cvUrl = null;
+      if (req.file && req.file.path) {
+        cvUrl = req.file.path; // Multer with Cloudinary gives this automatically
+      }
+  
+      // Prepare user update data
+      const updateData = {
+        userId,
+        username,
+        email,
+        competance,
+        experiences,
+        telephone,
+        currentPosition,
+        Motivationletter,
+        cvLink: cvUrl,
+        
+         // You can sav
+      };
+  
+      await userModel.findByIdAndUpdate(userId, updateData, { new: true });
+  
+      // Prevent duplicates
+      if (!user.offres.includes(offre._id)) {
+        user.offres.push(offre._id);
+      }
+  
+      if (!offre.candidats.find(c => c.toString() === user._id.toString())) {
+       
+        offre.candidats.push(updateData);
 
-exports.postulerA = async (req, res) => {
-  try {
-    const { username,email, competance, experiences,telephone,currentPosition ,Motivationletter} = req.body;
-    const { userId, offreId } = req.params;
-// kn  mawjoud
-    const user = await userModel.findById(userId);
-    const offre = await Offre.findById(offreId);
-
-    if (!user || !offre) {
-      return res.status(404).json({ message: "User or Offer not found" });
+       
+        
+      }
+  
+      await user.save({ validateBeforeSave: false });
+      await offre.save();
+  
+      res.status(200).json({
+        message: "Application submitted successfully",
+        cvUrl,
+        userUpdate: updateData,
+      });
+  
+    } catch (err) {
+      console.error("PostulerA Error:", err);
+      res.status(500).json({
+        message: "Something went wrong",
+        error: err.message,
+      });
     }
-//
-    const updateData = {
-      username,
-      competance,
-      experiences,
-      telephone,
-      currentPosition,
-      Motivationletter,
-      email
- 
-    };
-    await userModel.findByIdAndUpdate(userId, updateData);
-
-    // Prevent duplicate entries
-    if (!user.offres.includes(offre._id)) {
-      user.offres.push(offre._id);
-      user.offres.push(offre);
-    }
-
-    if (!offre.candidats.includes(user._id)) {
-      offre.candidats.push(updateData);
-    }
-
-    await user.save({ validateBeforeSave: false });
-    await offre.save();
-
-    res.status(200).json({
-      message: "Application successful",
-      userUpdate: updateData,
-      user,
-      offre,
-    });
-
-  } catch (err) {
-    console.error("Postuler error:", err);
-    res.status(500).json({ message: "Something went wrong", error: err.message });
-  }
-};
+  };
+  

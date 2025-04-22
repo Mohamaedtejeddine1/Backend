@@ -1,41 +1,25 @@
 const multer = require("multer");
-const path = require('path')
-const fs = require('fs')
-// const cloudinary = require("cloudinary");
-// const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../utils/cloudinary");
 
-
-// const storage = new CloudinaryStorage({
-//   cloudinary: cloudinary,
-//   params: {
-//     folder: "uploads", // or 'cvs'
-//     allowed_formats: ["jpg", "png", "pdf"],
-//   },
-// });
-
-
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/files')
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    transformation: [{ fetch_format: "pdf" }],
+    access_mode: "public", 
+    tags: "public_cv" ,
+     folder: "cvs",
+    resource_type: "auto", 
+    allowed_formats: ["pdf", "doc", "docx"], 
+    use_filename: true, 
+    unique_filename: true, 
+    overwrite: false, 
+    type: "upload", 
+    sign_url: false, 
+    invalidate: true, 
   },
-  filename: function (req, file, cb) {
-    const uploadPath = 'public/files';
-    const originalName = file.originalname;
-    const fileExtension = path.extname(originalName);
-    let fileName = originalName;
+  
+});
+const upload = multer({ storage });
 
-    // Vérifier si le fichier existe déjà
-    
-    let fileIndex = 1;
-    while (fs.existsSync(path.join(uploadPath, fileName))) {
-      const baseName = path.basename(originalName, fileExtension);
-      fileName = `${baseName}_${fileIndex}${fileExtension}`;
-      fileIndex++;
-    }
-
-    cb(null, fileName);
-  }
-})
-
-var uploadfile = multer({ storage: storage });
-module.exports = uploadfile;
+module.exports = upload;

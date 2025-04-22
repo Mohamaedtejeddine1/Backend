@@ -21,7 +21,7 @@ const offreSchema = new mongoose.Schema({
       telephone:String,
       currentPosition:String,
       Motivationletter:String,
-      cv:String,
+      cvLink: String,
       appliedAt: { type: Date, default: Date.now },
     },
   ],

@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema(
       required: false,
     },
 
-    cv: { type: String },
+    cvLink: String,
     password: {
       type: String,
       // required: true,
