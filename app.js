@@ -4,6 +4,7 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
+
 const session = require("express-session");
 const cors = require("cors");
 const http = require("http");
@@ -16,6 +17,7 @@ const indexRouter = require("./routes/indexRouter");
 const userRouter = require("./routes/userRouter");
 const offreRouter = require("./routes/offreRouter");
 const GeminiRouter = require("./routes/GeminiRouter");
+global.fetch = require("node-fetch");
 
 const app = express();
 
@@ -26,6 +28,22 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(logMiddleware);
+
+app.use(express.json({
+  strict: true
+}));
+// app.post("/Gemini/test-gemini", (req, res) => {
+//   try {
+//     console.log("BODY:", req.body);
+//     if (!req.body || Object.keys(req.body).length === 0) {
+//       return res.status(400).json({ error: "Empty or invalid JSON body" });
+//     }
+//     res.json({ success: true, data: req.body });
+//   } catch (error) {
+//     console.error("ERROR:", error);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
 
 // CORS Configuration
 app.use(
@@ -59,6 +77,9 @@ app.use("/users", userRouter);
 app.use("/offres", offreRouter);
 app.use("/Gemini", GeminiRouter);
 
+
+
+
 // Catch 404 (Not Found)
 app.use((req, res, next) => {
   next(createError(404, "Resource Not Found"));
@@ -72,6 +93,7 @@ app.use((err, req, res, next) => {
     message: err.message || "Something went wrong!",
   });
 });
+
 
 // Server
 const server = http.createServer(app);

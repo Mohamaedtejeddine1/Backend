@@ -3,14 +3,16 @@ const userModel = require("../models/userSchema");
 const authMiddleware=require("../middlewares/authMiddleware")
 const jwt = require('jsonwebtoken');
 const fs = require('fs'); 
-const Offre=require("../models/offreSchema")
+const Offre=require("../models/offreSchema");
+const cloudinary = require("../utils/cloudinary"); 
+
 
 const maxTime = 24 *60 * 60 //24H
 //const maxTime = 1 * 60 //1min
 const createToken = (id) => {
     return jwt.sign({id},'net secret pfe', {expiresIn: maxTime })
 }
-// Create User (Candidat or Recruteur)
+
 exports.createUser = async (req, res) => {
     try {
         const { username, email, password, role, profil, offre, cv, lettreMotivation, experiences, competance } = req.body;
@@ -286,28 +288,24 @@ exports.updateCandidatDetails = async (req, res) => {
     }
   };
   
-  const cloudinary = require("../utils/cloudinary"); // or wherever your config is
 
+
+  // postuler  A hia li t5dm
   
   exports.postulerA = async (req, res) => {
     try {
       const { username, email, competance, experiences, telephone, currentPosition, Motivationletter } = req.body;
       const { userId, offreId } = req.params;
-  
       const user = await userModel.findById(userId);
       const offre = await Offre.findById(offreId);
-  
       if (!user || !offre) {
         return res.status(404).json({ message: "User or Offer not found" });
       }
-  
-      // Get CV link from Cloudinary
+    // lien li yrj3 ml cloudinary
       let cvUrl = null;
       if (req.file && req.file.path) {
-        cvUrl = req.file.path; // Multer with Cloudinary gives this automatically
+        cvUrl = req.file.path; 
       }
-  
-      // Prepare user update data
       const updateData = {
         userId,
         username,
@@ -318,34 +316,21 @@ exports.updateCandidatDetails = async (req, res) => {
         currentPosition,
         Motivationletter,
         cvLink: cvUrl,
-        
-         // You can sav
       };
-  
       await userModel.findByIdAndUpdate(userId, updateData, { new: true });
-  
-      // Prevent duplicates
       if (!user.offres.includes(offre._id)) {
         user.offres.push(offre._id);
-      }
-  
+      } 
       if (!offre.candidats.find(c => c.toString() === user._id.toString())) {
-       
-        offre.candidats.push(updateData);
-
-       
-        
+        offre.candidats.push(updateData);  
       }
-  
       await user.save({ validateBeforeSave: false });
       await offre.save();
-  
       res.status(200).json({
         message: "Application submitted successfully",
         cvUrl,
         userUpdate: updateData,
       });
-  
     } catch (err) {
       console.error("PostulerA Error:", err);
       res.status(500).json({

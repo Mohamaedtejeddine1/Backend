@@ -1,16 +1,17 @@
 const express = require("express");
-const { createOffre, getAllOffres, getOffreById, updateOffre, deleteOffre,postuler } = require("../controllers/offreController");
+const { createOffre, getAllOffres, getOffreById, updateOffre, deleteOffre,getOffresByRecruteur } = require("../controllers/offreController");
+const offreController= require("../controllers/offreController");
 const { requireAuthUser } = require("../middlewares/authMiddleware"); // Import the middleware
 
 const router = express.Router();
 
 
 router.post("/createOffre",requireAuthUser, createOffre); 
-router.get("/getAllOffres",requireAuthUser, getAllOffres); 
-router.get("/getOffreById/:id",requireAuthUser, getOffreById); 
-router.put("/updateOffre/:id", requireAuthUser, updateOffre); 
-router.delete("/deleteOffre/:id", requireAuthUser, deleteOffre); 
-
+router.get("/getAllOffres", getAllOffres); 
+router.get("/getOffreById/:id", getOffreById); 
+router.put("/updateOffre/:id", updateOffre); 
+router.delete("/deleteOffre/:id", deleteOffre); 
+router.get("/getOffresByRecruteur", requireAuthUser,offreController.getOffresByRecruteur);
 
 
 module.exports = router;

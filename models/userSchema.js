@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    isVerified: { type: Boolean, default: false },
 
     cvLink: String,
     password: {

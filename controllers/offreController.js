@@ -7,23 +7,32 @@ const userModel = require("../models/userSchema");
 
 module.exports.createOffre = async (req, res) => {
     try {
-        if (req.user.role === "recruteur") {
-        }
-
-        const { titre, description, competance, domaine, departement } = req.body;
+      
+        const { titre, description,domaine} = req.body;
         const offre = await Offre.create({
             titre,
             description,
-            competance,
+            
             domaine,
-            departement,
+          
             recrut: req.user.id, 
+     
+           
             
         });
 
         res.status(201).json(offre);
     } catch (error) {
         res.status(400).json({ error: error.message });
+    }
+};
+
+exports.getOffresByRecruteur = async (req, res) => {
+    try {
+       const offres = await Offre.find({ recrut: req.user.id });
+        res.status(200).json(offres);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
 
