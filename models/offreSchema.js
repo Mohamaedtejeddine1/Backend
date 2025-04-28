@@ -20,8 +20,8 @@ const offreSchema = new mongoose.Schema({
       competance:[{}],
       telephone:String,
       currentPosition:String,
-      Motivationletter:String,
-      cvLink: String,
+   
+      cv: String,
       appliedAt: { type: Date, default: Date.now },
     },
   ],

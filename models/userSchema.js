@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema(
     },
     isVerified: { type: Boolean, default: false },
 
-    cvLink: String,
+    cv: String,
     password: {
       type: String,
       // required: true,
@@ -41,6 +41,8 @@ const userSchema = new mongoose.Schema(
         "Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.",
       ],
     },
+  
+
     role: {
       type: String,
       enum: ["admin", "candidat", "recruteur"],
