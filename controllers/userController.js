@@ -289,71 +289,135 @@ exports.updateCandidatDetails = async (req, res) => {
   };
   
 
-
-  // postuler  A hia li t5dm
- 
-
-
-exports.postulerA = async (req, res) => {
-  try {
-    const { username, email, competance, experiences, telephone, currentPosition } = req.body;
-    const { userId, offreId } = req.params;
-
-    // Find user and offer
-    const user = await userModel.findById(userId);
-    const offre = await Offre.findById(offreId);
-
-    if (!user || !offre) {
-      return res.status(404).json({ message: "User or Offer not found" });
-    }
-
-    // Handle CV Upload from Cloudinary
-    let cvUrl = null;
-    if (req.file && req.file.path) {
-      cvUrl = req.file.path; // multer-storage-cloudinary puts secure_url in 'path'
-    }
-
-    // Build update data
-    const updateData = {
-      username,
-      email,
-      competance,
-      experiences,
-      telephone,
-      currentPosition,
-    };
-
-    // If CV is uploaded, add cvLink
-    if (cvUrl) {
-      updateData.cvLink = cvUrl;
-    }
-
-    // Update user
-    await userModel.findByIdAndUpdate(userId, updateData, { new: true });
-
-    // Update relations
-    if (!user.offres.includes(offre._id)) {
-      user.offres.push(offre._id);
-    }
-
-    if (!offre.candidats.find(c => c.toString() === user._id.toString())) {
-      offre.candidats.push(user._id); // Push user._id not the whole object
-    }
-
-    await user.save({ validateBeforeSave: false });
-    await offre.save();
-
-    res.status(200).json({
-      message: "Application submitted successfully",
-      cvUrl,
-      userUpdate: updateData,
-    });
-
-  } catch (err) {
-    console.error("PostulerA Error:", err);
-    res.status(500).json({
-      message: "Something went wrong",
-      error: err.message,
-    });
+  const pdfParse = require("pdf-parse");
+  const { GoogleGenerativeAI } = require("@google/generative-ai");
+  const axios = require("axios");
+// Ensure correct path
+  
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  
+  exports.postulerA = async (req, res) => {
+    try {
+      const { username, email, competance, experiences, telephone, currentPosition } = req.body;
+      const { userId, offreId } = req.params;
+  
+      const user = await userModel.findById(userId);
+      const offre = await Offre.findById(offreId);
+  
+      if (!user || !offre) {
+        return res.status(404).json({ message: "User or Offer not found" });
+      }
+  
+      // Handle CV URL
+      let cvUrl = null;
+      if (req.file && req.file.path) {
+        cvUrl = req.file.path;
+      }
+  
+      const updateData = {
+        username,
+        email,
+        competance,
+        experiences,
+        telephone,
+        currentPosition,
+      };
+  
+      if (cvUrl) {
+        updateData.cvLink = cvUrl;
+      }
+  
+      // Update user profile
+      await userModel.findByIdAndUpdate(userId, updateData, { new: true });
+  
+      // Associate user with offer
+      if (!user.offres.includes(offre._id)) {
+        user.offres.push(offre._id);
+      }
+  
+      if (!offre.candidats.find(c => c.user?.toString() === user._id.toString())) {
+        offre.candidats.push({
+          user: user._id,
+          username,
+          email,
+          experiences,
+          competance,
+          telephone,
+          currentPosition,
+          cvLink: cvUrl,
+        });
+      }
+  
+      await user.save({ validateBeforeSave: false });
+      await offre.save();
+  
+      // ========== Gemini CV Analysis ==========
+      let cvAnalysis = null;
+  
+      if (cvUrl && cvUrl.startsWith("http")) {
+        const response = await axios.get(cvUrl, { responseType: "arraybuffer" });
+        const pdfData = await pdfParse(response.data);
+        const extractedText = pdfData.text;
+  
+        const requiredSkills = typeof offre.competance === "string"
+          ? offre.competance.split(",").map(skill => skill.trim())
+          : [];
+  
+        const skillsString = requiredSkills.join(", ");
+  
+        const prompt = `
+  You are a strict CV analysis assistant focused on matching the CV content to the required skills.
+  Analyze the CV content below and compare it rigorously to these required skills: ${offre.competance}.
+  
+  Scoring Guidelines:
+  - 90-100: All required skills are explicitly mentioned and demonstrate strong, relevant experience.
+  - 70-80: Most required skills are present with clear examples of their application.
+  - 50-60: Approximately half of the required skills are identifiable, but the depth of experience might be limited.
+  - Below 50: Few required skills are evident or the experience is not relevant.
+  
+  Return ONLY a JSON object with the following fields:
+  {
+    "matchedSkills": ["...", ...],
+    "missingSkills": ["...", ...],
+    "score": "X/100",
+    "isCompatible": true/false,
+    "reasoning": "Brief justification for the assigned score.",
+    "summary": "2-3 sentence summary of the candidate's fit, highlighting strengths and weaknesses against the job requirements."
   }
-};
+  
+  CV Content:
+  ${extractedText}
+  
+  Only return the JSON object. No explanation.p
+        `;
+       
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        const result = await model.generateContent(prompt);
+        let text = await result.response.text();
+  
+        console.log("Gemini raw output:", text);
+  
+        try {
+          cvAnalysis = JSON.parse(text.trim());
+        } catch (e) {
+          const match = text.match(/\{[\s\S]*\}/);
+          if (match) cvAnalysis = JSON.parse(match[0]);
+          else cvAnalysis = { error: "Could not parse Gemini output" };
+        }
+      }
+  
+      res.status(200).json({
+        message: "Application submitted and analyzed successfully",
+        userUpdate: updateData,
+        cvAnalysis,
+      });
+  
+    } catch (err) {
+      console.error("PostulerA Error:", err);
+      res.status(500).json({
+        message: "Something went wrong",
+        error: err.message,
+      });
+    }
+  };
+  

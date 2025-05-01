@@ -2,23 +2,14 @@ const Offre = require("../models/offreSchema");
 const userModel = require("../models/userSchema");
 
 
-
-
-
 module.exports.createOffre = async (req, res) => {
     try {
-      
-        const { titre, description,domaine} = req.body;
+        const { titre, competance,domaine} = req.body;
         const offre = await Offre.create({
             titre,
-            description,
-            
+            competance,
             domaine,
-          
             recrut: req.user.id, 
-     
-           
-            
         });
 
         res.status(201).json(offre);

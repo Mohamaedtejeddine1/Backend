@@ -29,7 +29,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    isVerified: { type: Boolean, default: false },
+      compatible:String,
+      matchedSkills:String,
 
     cv: String,
     password: {
