@@ -56,17 +56,15 @@ const userSchema = new mongoose.Schema(
           ref: "Offre",
           required: true,
         },
-        title: [{
-
-        }]
+        titre: { type: String, required: true }  // Make sure to require the title
       },
     ],
-
+    
 
     Motivationletter: { type: String },
     experiences: [{ type: String, }], // keep as array so future updates work.
     competance: [{ type: String }],
-    offres: [{ type: mongoose.Schema.ObjectId, ref: "offre" }],
+   
 
 
   },

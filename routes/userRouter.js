@@ -15,11 +15,11 @@ router.get("/getUserById/:id", userController.getUserById);
 router.put("/updateUserById/:id",userController.updateUserById);
 router.delete("/deleteUserById/:id", userController.deleteUserById);
 router.put('/updateCandidatDetails/:id', upload.single('cv'), userController.updateCandidatDetails);
-  router.put(
-         "/updateProfil/:id", 
-    userController.updateProfil
-  );
-  
+router.put(
+  "/updateProfil/:id",
+  upload.single('cv'),
+  userController.updateProfil
+);
   router.post(
     "/postulerA/:userId/:offreId",
     upload.single("cv"), 

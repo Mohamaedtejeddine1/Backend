@@ -219,22 +219,19 @@ exports.updateCandidatDetails = async (req, res) => {
 
   exports.updateProfil = async (req, res) => {
     try {
-    
       const { id } = req.params;
-      const { username, email, experiences, competance } = req.body;
+      const { username, email, experiences, competance,currentPosition,telephone } = req.body;
   
-      // Update profile details
       const updatedCandidat = await userModel.findByIdAndUpdate(
         id,
         {
           username,
           email,
-          experiences,   // Changed to plural as per the request
-          competance,    // Corrected spelling for "competence"
+          experiences,currentPosition,
+          competance,telephone
         },
         { new: true }
       );
-      
   
       if (!updatedCandidat) {
         return res.status(404).json({ message: 'Candidate not found' });
@@ -244,13 +241,12 @@ exports.updateCandidatDetails = async (req, res) => {
         message: 'Profile updated successfully',
         updatedCandidat,
       });
-
-
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: 'Error updating profile', error });
     }
   };
+  
   exports.postuler = async (req, res) => {
     try {
       let { userId, offreId } = req.body;
@@ -332,8 +328,12 @@ exports.updateCandidatDetails = async (req, res) => {
   
       // Associate user with offer
       if (!user.offres.includes(offre._id)) {
-        user.offres.push(offre._id);
+        // user.offres.push(offre._id);
+        user.offres.push(offre.titre);
+        
+
       }
+    
   
       if (!offre.candidats.find(c => c.user?.toString() === user._id.toString())) {
         offre.candidats.push({
