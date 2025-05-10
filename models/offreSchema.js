@@ -16,18 +16,24 @@ const offreSchema = new mongoose.Schema({
       },
       username: String,
       email:String,
-      experiences:[{}],
-      competance:[{}],
+      experiences: [{ type: String, }],
+      competance: [{ type: String }],
       telephone:String,
       currentPosition:String,
    
       cvLink: String,
       appliedAt: { type: Date, default: Date.now },
+      cvAnalysis: {
+        matchedSkills: [String],
+        missingSkills: [String],
+        score: String,
+        isCompatible: Boolean,
+        reasoning: String,
+        summary: String,}
+      }
+
       
-      matchScore: Number,
-      compatible: Boolean,}
-      
-  ],
+  ],  
   
   
 });

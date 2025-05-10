@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
     },
+    emailVerificationToken: { type: String },
+    emailVerificationExpires: { type: Date },
+    emailVerified: { type: Boolean, default: false },
     // In your userSchema (e.g., User.js)
     telephone: {
       type: String,
@@ -29,21 +32,20 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
       compatible:String,
       matchedSkills:String,
-
-    cv: String,
+      newPassword:String,
+      cvLink: String,
     password: {
       type: String,
-      // required: true,
+     required: true,
       minLength: 8,
-      match: [
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-        "Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.",
-      ],
+    
     },
   
-
+    
     role: {
       type: String,
       enum: ["admin", "candidat", "recruteur"],
@@ -59,7 +61,10 @@ const userSchema = new mongoose.Schema(
         titre: { type: String, required: true }  // Make sure to require the title
       },
     ],
-    
+    cvAnalysis: {
+      type: Map,
+      of: String,  // You can make this an object if you need more detailed structure
+    },
 
     Motivationletter: { type: String },
     experiences: [{ type: String, }], // keep as array so future updates work.
@@ -83,17 +88,34 @@ const userSchema = new mongoose.Schema(
 
 
 
-userSchema.pre("save", async function (next) {
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next(); // Skip hashing if password is not modified
   try {
     const salt = await bcrypt.genSalt();
-    const user = this;
-    user.password = await bcrypt.hash(user.password, salt);
-
+    this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
     next(error);
   }
 });
+userSchema.statics.login = async function (email, password) {
+  try {
+    const user = await this.findOne({ email });
+    if (!user) {
+      throw new Error("Email not found");
+    }
+
+    const auth = await bcrypt.compare(password, user.password);
+    if (!auth) {
+      throw new Error("Invalid password");
+    }
+
+    return user; // Return the user if authentication is successful
+  } catch (error) {
+    throw new Error(`Login failed: ${error.message}`);
+  }
+};
+
 
 userSchema.post("save", async function (req, res, next) {
   console.log("new user was created & saved successfully");
@@ -124,30 +146,8 @@ userSchema.statics.login = async function (email, password) {
       throw new Error("email not found");
     }
 };*/
-userSchema.statics.login = async function (email, password) {
-  //console.log(email, password);
-  const user = await this.findOne({ email });
-  // console.log(user)
-  if (user) {
-    const auth = await bcrypt.compare(password, user.password);
-    //console.log(auth)
-    if (auth) {
-      // if (user.etat === true) {
-      //   if (user.ban === false) {
-      return user;
-      //   } else {
-      //     throw new Error("ban");
-      //   }
-      // } else {
-      //   throw new Error("compte desactive ");
-      // }
-    } else {
-      throw new Error("password invalid");
-    }
-  } else {
-    throw new Error("email not found");
-  }
-};
+
+
 userSchema.statics.register = async function (username, email, password, role) {
   if (!["candidat", "recruteur"].includes(role)) {
     throw new Error("Invalid role");
@@ -159,6 +159,8 @@ userSchema.statics.register = async function (username, email, password, role) {
   }
 
   const user = new this({ username, email, password, role });
+ 
+
   await user.save();
   return user;
 };
