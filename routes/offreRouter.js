@@ -13,5 +13,7 @@ router.put("/updateOffre/:id", updateOffre);
 router.delete("/deleteOffre/:id", deleteOffre); 
 router.get("/getOffresByRecruteur", requireAuthUser,offreController.getOffresByRecruteur);
 
+router.put('/updateCandidateStatus/:offreId/:candidateId', offreController.updateCandidateStatus);
 
+router.get('/getApplicationsOverTime/', offreController.getApplicationsOverTime);
 module.exports = router;

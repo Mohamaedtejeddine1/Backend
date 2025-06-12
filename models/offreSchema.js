@@ -6,7 +6,11 @@ const offreSchema = new mongoose.Schema({
   competance: { type: String, required: false },
   domaine: { type: String, required: true },
   departement: { type: String, required: false  },
-  status: { type: String, enum: ["open", "close"], default: "open" },
+ status: {
+  type: String,
+  enum: ["open", "closed"], 
+  default: "open"
+}, 
   recrut: { type: mongoose.Schema.ObjectId, ref: "User" } ,
   candidats: [
     {
@@ -14,12 +18,19 @@ const offreSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: "User",
       },
+      //status: { type: String, enum: ['pending', 'accept', 'reject', 'interview'], default: 'pending' },
+      linkedin: {
+      type: String,
+      required: false,
+      match: [/^https?:\/\/(www\.)?linkedin\.com\/.*$/, 'Invalid LinkedIn URL'],
+    },
       username: String,
       email:String,
       experiences: [{ type: String, }],
       competance: [{ type: String }],
       telephone:String,
-      currentPosition:String,
+      education:String,
+      location:String,
    
       cvLink: String,
       appliedAt: { type: Date, default: Date.now },
@@ -36,7 +47,7 @@ const offreSchema = new mongoose.Schema({
   ],  
   
   
-});
+});{ timestamps: true }; 
 
 const Offre = mongoose.model('Offre', offreSchema);
 

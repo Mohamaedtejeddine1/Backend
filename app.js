@@ -17,9 +17,16 @@ const indexRouter = require("./routes/indexRouter");
 const userRouter = require("./routes/userRouter");
 const offreRouter = require("./routes/offreRouter");
 const GeminiRouter = require("./routes/GeminiRouter");
+const contactRoutes = require('./routes/contactRoutes');
+const interviewRouter=require('./routes/interviewRouter');
+const googleRouter = require("./routes/googleRouter");
+const adminRouter = require("./routes/adminRouter");
+const applicationStatusRoutes = require('./routes/applicationStatusRoutes');
+
 global.fetch = require("node-fetch");
 
 const app = express();
+app.use('/uploads', express.static('uploads'));
 
 // Middlewares
 app.use(logger("dev"));
@@ -76,6 +83,16 @@ app.use("/", indexRouter);
 app.use("/users", userRouter);
 app.use("/offres", offreRouter);
 app.use("/Gemini", GeminiRouter);
+app.use('/contact', contactRoutes);
+app.use('/interview',interviewRouter)
+app.use('/admin',adminRouter)
+app.use('/applications', applicationStatusRoutes);
+
+
+
+
+
+app.use("/api/auth", googleRouter);
 
 
 

@@ -14,7 +14,8 @@ exports.requireAuthUser = (req, res, next) => {
     const decoded = jwt.verify(token, secretKey);
     req.user = decoded; 
     req.user._id
-    req.user.role ="candidat,recruteur"
+    req.user
+    req.user.role ="candidat,recruteur,admin"
     next();
   } catch (error) {
     return res.status(403).json({ message: "Forbidden: Invalid token" });

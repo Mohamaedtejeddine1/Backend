@@ -2,12 +2,16 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const userSchema = new mongoose.Schema(
   {
-    profileImage: { String },
+    profilImage: {
+  type: String,
+  default: '', 
+},
     username: {
       type: String,
       required: false,
       unique: true,
     },
+   
     telephone: {
       type: String
     }
@@ -28,7 +32,7 @@ const userSchema = new mongoose.Schema(
       required: false, // set to true if mandatory
     },
 
-    currentPosition: {
+    location: {
       type: String,
       required: false,
     },
@@ -45,34 +49,45 @@ const userSchema = new mongoose.Schema(
     
     },
   
-    
+    loginCount: {
+  type: Number,
+  default: 0
+},
+isOnline: {
+  type: Boolean,
+  default: false
+},lastLogin: {
+  type: Date 
+},education:String,
     role: {
       type: String,
       enum: ["admin", "candidat", "recruteur"],
     },
     profil: { type: String },
-    offres: [
-      {
-        id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Offre",
-          required: true,
-        },
-        titre: { type: String, required: true }  // Make sure to require the title
-      },
-    ],
+offres: [
+  {
+    id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "Offre" },
+    titre: String
+  }
+],
     cvAnalysis: {
       type: Map,
       of: String,  // You can make this an object if you need more detailed structure
     },
 
-    Motivationletter: { type: String },
+ 
     experiences: [{ type: String, }], // keep as array so future updates work.
     competance: [{ type: String }],
-   
+     linkedin: {
+      type: String,
+      required: false,
+      match: [/^https?:\/\/(www\.)?linkedin\.com\/.*$/, 'Invalid LinkedIn URL'],
+    },
 
-
+  company: { type: String },
+  poste: { type: String },
   },
+
 
 
   { timestamps: true }
@@ -164,6 +179,20 @@ userSchema.statics.register = async function (username, email, password, role) {
   await user.save();
   return user;
 };
+async function createAdmin() {
+  const hashedPassword = await bcrypt.hash("adminA@128", 10);
+
+  const admin = new userModel({
+    email: "admin@gmail.com",
+    password: hashedPassword,
+    role: "admin",
+    username: "Admin"
+  });
+
+  await admin.save();
+  console.log("✅ Admin created!");
+  mongoose.disconnect();
+}
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;
